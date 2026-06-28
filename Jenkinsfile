@@ -2,13 +2,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/vnit2075/elitemart-docker-jenkins.git'
-            }
-        }
-
         stage('Build docker image') {
             steps {
                 sh 'docker compose up -d --build'
