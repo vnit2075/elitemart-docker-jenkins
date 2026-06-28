@@ -12,10 +12,14 @@ pipeline {
         stage('Build & Deploy Docker Image') {
             steps {
                 sh '''
-                    # Stop and remove existing containers if they exist (don't fail if they don't)
+                    # 1. Standard compose cleanup
                     docker compose down || true
                     
-                    # Build new images and start containers in detached mode
+                    # 2. Force remove specific containers
+                    docker rm -f elitemart-mysql || true
+                    docker rm -f elitemart-app || true
+                    
+                    # 3. Build new images and start containers
                     docker compose up -d --build
                 '''
             }
