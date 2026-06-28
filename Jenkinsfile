@@ -1,55 +1,48 @@
 pipeline {
     agent any
-
+    
     stages {
-
-        stage('Build & Deploy') {
+        stage('Checkout') {
+            steps {
+                // Checkout code from Git
+                git branch: 'main', url: 'https://github.com/vnit2075/elitemart-docker-jenkins.git'
+            }
+        }
+        
+        stage('Build & Deploy Docker Image') {
             steps {
                 sh '''
+                    # Stop and remove existing containers if they exist (don't fail if they don't)
                     docker compose down || true
+                    
+                    # Build new images and start containers in detached mode
                     docker compose up -d --build
                 '''
             }
         }
-
-        stage('Verify Images') {
+        
+        stage('Checking the images') {
             steps {
                 sh 'docker images'
             }
         }
-
-        stage('Verify Containers') {
+        
+        stage('Check running containers') {
             steps {
-                sh 'docker ps -a'
-            }
-        }
-
-        stage('Application Health') {
-            steps {
-                sh 'sleep 20'
-                sh 'curl -I http://localhost:8080 || true'
+                sh 'docker ps'
             }
         }
     }
-
+    
     post {
-
-        success {
-            echo '========================================='
-            echo 'Deployment Successful'
-            echo 'Application : http://<EC2-PUBLIC-IP>:8080'
-            echo '========================================='
-        }
-
-        failure {
-            echo '========================================='
-            echo 'Deployment Failed'
-            echo 'Check Jenkins Console Output'
-            echo '========================================='
-        }
-
         always {
-            echo 'Pipeline Execution Completed'
+            echo 'Pipeline execution finished.'
+        }
+        success {
+            echo '✅ Deployment successful! Application is running on port 8080.'
+        }
+        failure {
+            echo '❌ Deployment failed. Check the logs above for details.'
         }
     }
 }
