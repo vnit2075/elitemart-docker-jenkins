@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+
+  # ── MySQL 8.4 (closest to 8.5 — 8.5 is not released) ──────
+  mysql:
+    image: mysql:8.4
+    container_name: elitemart-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: elitemart_db
+      MYSQL_USER: elitemart
+      MYSQL_PASSWORD: elitemart123
+    ports:
+      - "3307:3306"          # exposed on host port 3307
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - elitemart-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+
+  # ── Spring Boot Application ─────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: elitemart-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/elitemart_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true"
+      SPRING_DATASOURCE_USERNAME: elitemart
+      SPRING_DATASOURCE_PASSWORD: elitemart123
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - elitemart-net
+
+networks:
+  elitemart-net:
+    driver: bridge
+
+volumes:
+  mysql_data:

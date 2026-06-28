@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — EliteMart</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+  <section class="admin-section">
+    <div class="container">
+
+      <!-- Header -->
+      <div class="admin-header">
+        <div>
+          <h1 class="admin-title">
+            <i class="bi bi-speedometer2 me-2" style="color:var(--gold);"></i>Admin Dashboard
+          </h1>
+          <p class="admin-subtitle">
+            Logged in as <strong sec:authentication="name"></strong>
+          </p>
+        </div>
+        <a th:href="@{/admin/products/add}" class="btn-gold"
+           style="padding:0.65rem 1.4rem; border-radius:50px;">
+          <i class="bi bi-plus-lg me-2"></i>Add Product
+        </a>
+      </div>
+
+      <!-- Flash Messages -->
+      <div th:if="${success}" class="alert-success-custom mb-4">
+        <i class="bi bi-check-circle me-2"></i><span th:text="${success}"></span>
+      </div>
+      <div th:if="${error}" class="alert-danger-custom mb-4">
+        <i class="bi bi-exclamation-circle me-2"></i><span th:text="${error}"></span>
+      </div>
+
+      <!-- ── Stat Cards ── -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-gold"><i class="bi bi-box-seam"></i></div>
+            <div>
+              <div class="stat-value" th:text="${productCount}">0</div>
+              <div class="stat-label">Total Products</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-blue"><i class="bi bi-people"></i></div>
+            <div>
+              <div class="stat-value" th:text="${userCount}">0</div>
+              <div class="stat-label">Registered Users</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="stat-card">
+            <div class="stat-icon stat-icon-green"><i class="bi bi-circle-fill" style="font-size:.7rem;"></i></div>
+            <div>
+              <div class="stat-value" style="font-size:1.4rem; color:var(--success);">Live</div>
+              <div class="stat-label">Store Status</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Product Table ── -->
+      <div class="admin-card">
+        <div class="admin-card-title">Product Inventory</div>
+
+        <!-- Empty state -->
+        <div th:if="${#lists.isEmpty(products)}" class="empty-state" style="padding:3rem 1rem;">
+          <div class="empty-state-icon">📦</div>
+          <div class="empty-state-title">No products yet</div>
+          <div class="empty-state-body">
+            <a th:href="@{/admin/products/add}">Add your first product →</a>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive" th:unless="${#lists.isEmpty(products)}">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Product Name</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Added</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="product : ${products}">
+
+                <!-- Thumbnail -->
+                <td>
+                  <img th:if="${product.hasImage()}"
+                       th:src="@{/products/image/{id}(id=${product.id})}"
+                       th:alt="${product.name}"
+                       class="product-thumb">
+                  <div th:unless="${product.hasImage()}" class="product-thumb-empty">
+                    <i class="bi bi-image"></i>
+                  </div>
+                </td>
+
+                <!-- Name -->
+                <td style="font-weight:600;" th:text="${product.name}">Name</td>
+
+                <!-- Description (truncated) -->
+                <td style="color:var(--text-muted);"
+                    th:text="${product.description != null && product.description.length() > 60}
+                              ? ${product.description.substring(0,60)} + '…'
+                              : ${product.description}">
+                  Description
+                </td>
+
+                <!-- Price -->
+                <td>
+                  <span class="price-badge"
+                        th:text="'₹' + ${#numbers.formatDecimal(product.price,1,'COMMA',2,'POINT')}">
+                    ₹0.00
+                  </span>
+                </td>
+
+                <!-- Date -->
+                <td style="color:var(--text-muted); font-size:0.8rem;"
+                    th:text="${#temporals.format(product.createdAt,'dd MMM yyyy')}">
+                  Date
+                </td>
+
+                <!-- Delete action -->
+                <td>
+                  <form th:action="@{/admin/products/delete/{id}(id=${product.id})}"
+                        method="post"
+                        onsubmit="return confirm('Delete this product permanently?');">
+                    <button type="submit" class="btn-delete">
+                      <i class="bi bi-trash3 me-1"></i>Delete
+                    </button>
+                  </form>
+                </td>
+
+              </tr>
+            </tbody>
+          </table>
+        </div><!-- /table-responsive -->
+
+      </div><!-- /admin-card -->
+
+    </div><!-- /container -->
+  </section>
+
+  <!-- Footer -->
+  <footer class="elite-footer">
+    <div class="container">
+      <div class="footer-brand">
+        <span class="brand-elite">Elite</span><span class="brand-mart">Mart</span>
+      </div>
+      <p class="footer-text">© 2024 EliteMart Admin Panel</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

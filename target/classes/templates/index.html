@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EliteMart — Premium E-Commerce</title>
+  <meta name="description" content="EliteMart — Discover premium products curated for the discerning buyer.">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+  <!-- ═══ HERO ════════════════════════════════════════════════════════════ -->
+  <section class="hero-section">
+    <div class="container position-relative">
+      <div class="row align-items-center g-5">
+
+        <!-- Left column -->
+        <div class="col-lg-6">
+          <span class="hero-badge fade-in-up">✦ Premium Collection 2024</span>
+
+          <h1 class="hero-title fade-in-up-d1">
+            Discover
+            <span class="highlight">Elite</span><br>
+            Products for<br>Every Taste
+          </h1>
+
+          <p class="hero-subtitle fade-in-up-d2">
+            Shop the finest selection of premium products curated for the discerning buyer.
+            Quality meets elegance — only at EliteMart.
+          </p>
+
+          <div class="d-flex flex-wrap gap-3 fade-in-up-d2">
+            <a th:href="@{/products}" class="btn-gold"
+               style="padding:0.8rem 2.2rem; font-size:0.95rem; border-radius:50px;">
+              Shop Now &nbsp;<i class="bi bi-arrow-right"></i>
+            </a>
+            <a th:href="@{/register}" sec:authorize="isAnonymous()"
+               class="btn-outline-elite">
+              Join Free
+            </a>
+          </div>
+
+          <!-- Stats -->
+          <div class="hero-stats fade-in-up-d3">
+            <div>
+              <div class="hero-stat-value" th:text="${totalProducts} + '+'">0+</div>
+              <div class="hero-stat-label">Products</div>
+            </div>
+            <div style="width:1px; background:var(--border-subtle);"></div>
+            <div>
+              <div class="hero-stat-value">100%</div>
+              <div class="hero-stat-label">Authentic</div>
+            </div>
+            <div style="width:1px; background:var(--border-subtle);"></div>
+            <div>
+              <div class="hero-stat-value">24/7</div>
+              <div class="hero-stat-label">Support</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column — decorative icon grid -->
+        <div class="col-lg-6 d-none d-lg-flex justify-content-center">
+          <div class="hero-image-grid">
+            <div class="hero-icon-card fade-in-up-d1">🛍️</div>
+            <div class="hero-icon-card fade-in-up-d2">💎</div>
+            <div class="hero-icon-card fade-in-up-d2">⌚</div>
+            <div class="hero-icon-card fade-in-up-d3">👑</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ FEATURED PRODUCTS ════════════════════════════════════════════════ -->
+  <section class="products-section">
+    <div class="container">
+
+      <div class="section-header">
+        <h2 class="section-title">Featured Products</h2>
+        <div class="gold-line"></div>
+        <p class="section-subtitle">Hand-picked premium items just for you</p>
+      </div>
+
+      <!-- Empty state -->
+      <div th:if="${#lists.isEmpty(products)}" class="empty-state">
+        <div class="empty-state-icon">🛒</div>
+        <div class="empty-state-title">No products yet</div>
+        <div class="empty-state-body">Check back soon — amazing items are on their way!</div>
+      </div>
+
+      <!-- Product grid -->
+      <div class="row g-4" th:unless="${#lists.isEmpty(products)}">
+        <div class="col-sm-6 col-lg-3" th:each="product : ${products}">
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <img th:if="${product.hasImage()}"
+                   th:src="@{/products/image/{id}(id=${product.id})}"
+                   th:alt="${product.name}">
+              <div th:unless="${product.hasImage()}" class="product-placeholder">
+                <i class="bi bi-bag-heart"></i>
+                <span>No Image</span>
+              </div>
+            </div>
+            <div class="product-body">
+              <div class="product-name" th:text="${product.name}">Name</div>
+              <div class="product-desc" th:text="${product.description}">Description</div>
+              <div>
+                <div class="product-price-label">Price</div>
+                <div class="product-price"
+                     th:text="'₹' + ${#numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')}">
+                  ₹0.00
+                </div>
+              </div>
+              <div class="product-actions">
+                <button class="btn-cart">Add to Cart</button>
+                <button class="btn-wish"><i class="bi bi-heart"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- View All button when there are more than 8 -->
+      <div class="text-center mt-5" th:if="${totalProducts > 8}">
+        <a th:href="@{/products}" class="btn-gold"
+           style="padding:0.82rem 2.5rem; border-radius:50px;">
+          View All Products &nbsp;<i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══ CTA ══════════════════════════════════════════════════════════════ -->
+  <section class="cta-section">
+    <div class="container">
+      <span class="hero-badge">Join EliteMart Today</span>
+      <h2 class="cta-title">
+        Start Your <span class="highlight">Premium</span> Journey
+      </h2>
+      <p class="cta-subtitle">Create a free account and explore our exclusive collection.</p>
+
+      <div sec:authorize="isAnonymous()">
+        <a th:href="@{/register}" class="btn-gold"
+           style="padding:0.88rem 2.6rem; font-size:0.97rem; border-radius:50px;">
+          Create Free Account
+        </a>
+      </div>
+      <div sec:authorize="isAuthenticated()">
+        <a th:href="@{/products}" class="btn-gold"
+           style="padding:0.88rem 2.6rem; font-size:0.97rem; border-radius:50px;">
+          Browse All Products
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="elite-footer">
+    <div class="container">
+      <div class="footer-brand">
+        <span class="brand-elite">Elite</span><span class="brand-mart">Mart</span>
+      </div>
+      <p class="footer-text">© 2024 EliteMart — Premium E-Commerce Experience</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
