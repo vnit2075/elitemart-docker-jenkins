@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 
 echo "========================================"
@@ -45,4 +44,3 @@ docker compose version
 
 echo ""
 echo "Please log out and log in again (or reboot) before using Docker without sudo."
-```
