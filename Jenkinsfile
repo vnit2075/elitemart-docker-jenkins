@@ -4,7 +4,7 @@ pipeline {
 	stages {
 		stage('Checkout') {
 			steps {
-				git branch:'main'
+				git branch:'main',
 				url:https:'//github.com/vnit2075/elitemart-docker-jenkins.git'
 				}
 		}
