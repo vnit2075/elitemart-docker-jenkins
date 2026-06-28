@@ -2,34 +2,54 @@ pipeline {
     agent any
 
     stages {
-        stage('Build docker image') {
+
+        stage('Build & Deploy') {
             steps {
-		sh 'docker compose down || true && docker compose up -d --build'
+                sh '''
+                    docker compose down || true
+                    docker compose up -d --build
+                '''
             }
         }
 
-        stage('Checking the images') {
+        stage('Verify Images') {
             steps {
                 sh 'docker images'
             }
         }
 
-        stage('Check running containers') {
+        stage('Verify Containers') {
             steps {
                 sh 'docker ps -a'
+            }
+        }
+
+        stage('Application Health') {
+            steps {
+                sh 'sleep 20'
+                sh 'curl -I http://localhost:8080 || true'
             }
         }
     }
 
     post {
+
         success {
-            echo 'Deployment successfully done!.. Application running on port 8080'
+            echo '========================================='
+            echo 'Deployment Successful'
+            echo 'Application : http://<EC2-PUBLIC-IP>:8080'
+            echo '========================================='
         }
+
         failure {
-            echo 'Deployment failed...!!! Check the logs.....'
+            echo '========================================='
+            echo 'Deployment Failed'
+            echo 'Check Jenkins Console Output'
+            echo '========================================='
         }
+
         always {
-            echo '.........Pipeline execution completed..........'
+            echo 'Pipeline Execution Completed'
         }
     }
 }
