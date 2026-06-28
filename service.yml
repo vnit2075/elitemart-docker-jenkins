@@ -1,0 +1,29 @@
+# ============================================
+#  MySQL Service (internal — pods talk to MySQL here)
+# ============================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+spec:
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
+
+# ============================================
+#  EliteMart Service (external — users access app here)
+# ============================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: elitemart-service
+spec:
+  type: NodePort
+  selector:
+    app: elitemart
+  ports:
+    - port: 80
+      targetPort: 8085
+      nodePort: 30080       # Access at → http://<NODE-IP>:30080
